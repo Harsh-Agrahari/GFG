@@ -20,6 +20,7 @@ class GfG {
             int sum = Integer.parseInt(read.readLine());
             Solution ob = new Solution();
             System.out.println(ob.count(arr, sum));
+            System.out.println("~");
         }
     }
 }
@@ -27,26 +28,32 @@ class GfG {
 // } Driver Code Ends
 
 
-// User function Template for Java
-
 class Solution {
     public int count(int coins[], int sum) {
-        // Create a DP array to store the number of ways to make each sum
-        int[] dp = new int[sum + 1];
-
-        // Base case: There's 1 way to make sum 0 (use no coins)
-        dp[0] = 1;
-
-        // Iterate through each coin
-        for (int coin : coins) {
-            // Update the dp array for sums >= coin
-            for (int j = coin; j <= sum; j++) {
-                dp[j] += dp[j - coin];
-            }
+        int n = coins.length;
+        Integer[][] memo = new Integer[n + 1][sum + 1];
+        return countHelper(coins, 0, sum, memo);
+    }
+    
+    private int countHelper(int[] coins, int index, int sum, Integer[][] memo) {
+        if (index >= coins.length) {
+            return 0;
         }
-
-        // The answer is the number of ways to make the target sum
-        return dp[sum];
+        
+        if (sum == 0) {
+            return 1;
+        }
+        
+        if (memo[index][sum] != null) {
+            return memo[index][sum];
+        }
+        
+        int notTake = countHelper(coins, index + 1, sum, memo);
+        
+        int take = 0;
+        if (sum - coins[index] >= 0) take = countHelper(coins, index, sum - coins[index], memo);
+        
+        return memo[index][sum] = take + notTake;
+        
     }
 }
-
