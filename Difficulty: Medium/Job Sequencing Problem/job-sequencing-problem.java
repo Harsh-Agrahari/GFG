@@ -1,78 +1,96 @@
 //{ Driver Code Starts
-import java.io.*;
-import java.lang.*;
+// Initial Template for Java
 import java.util.*;
 
-class Job {
-    int id, profit, deadline;
 
-    Job(int x, int y, int z) {
-        this.id = x;
-        this.deadline = y;
-        this.profit = z;
+// } Driver Code Ends
+
+class Solution {
+
+    public ArrayList<Integer> jobSequencing(int[] deadline, int[] profit) {
+        // code here
+        ArrayList<Integer> result = new ArrayList<>();
+        int[] sorted = new int[profit.length];
+        boolean[] job = new boolean[profit.length];
+
+        // Copy and sort profits in descending order
+        System.arraycopy(profit, 0, sorted, 0, profit.length);
+        Arrays.sort(sorted);
+        reverseArray(sorted);
+
+        int[] maxProfit = {0};
+        int jobs = 0;
+
+        for (int i = 0; i < profit.length; i++) {
+            int curr = sorted[i];
+            int index = findJob(profit, curr);
+            jobs += DoneOrNot(deadline[index], job, maxProfit, curr);
+        }
+
+        result.add(jobs);
+        result.add(maxProfit[0]);
+        return result;
+    }
+
+    public static int DoneOrNot(int d, boolean[] j, int[] m, int c) {
+        while (d > 0) {
+            if (!j[d - 1]) { // If job slot is available
+                m[0] += c;
+                j[d - 1] = true;
+                return 1;
+            }
+            d--; // Try earlier deadline slots
+        }
+        return 0;
+    }
+
+    public static void reverseArray(int[] arr) {
+        int left = 0, right = arr.length - 1;
+        while (left < right) {
+            // Swap elements
+            int temp = arr[left];
+            arr[left] = arr[right];
+            arr[right] = temp;
+            left++;
+            right--;
+        }
+    }
+
+    public static int findJob(int[] profit, int n) {
+        int ind = 0;
+        for (int i = 0; i < profit.length; i++) {
+            if (profit[i] == n) {
+                ind = i;
+                profit[i] = 0; // Mark job as taken
+                break;
+            }
+        }
+        return ind;
     }
 }
 
-class GfG {
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//{ Driver Code Starts.
 
+public class Main {
+    public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        int t = Integer.parseInt(sc.nextLine());
+        int t = Integer.parseInt(sc.nextLine().trim());
+
         while (t-- > 0) {
-            String[] jobIDStrings = sc.nextLine().split(" ");
-            String[] deadlineStrings = sc.nextLine().split(" ");
-            String[] profitStrings = sc.nextLine().split(" ");
+            String[] deadlineInput = sc.nextLine().trim().split("\\s+");
+            int[] deadline =
+                Arrays.stream(deadlineInput).mapToInt(Integer::parseInt).toArray();
 
-            // Convert the input strings to integer arrays
-            int[] jobIDs = new int[jobIDStrings.length];
-            int[] deadlines = new int[deadlineStrings.length];
-            int[] profits = new int[profitStrings.length];
-
-            for (int i = 0; i < jobIDStrings.length; i++) {
-                jobIDs[i] = Integer.parseInt(jobIDStrings[i]);
-                deadlines[i] = Integer.parseInt(deadlineStrings[i]);
-                profits[i] = Integer.parseInt(profitStrings[i]);
-            }
+            String[] profitInput = sc.nextLine().trim().split("\\s+");
+            int[] profit =
+                Arrays.stream(profitInput).mapToInt(Integer::parseInt).toArray();
             Solution obj = new Solution();
-            ArrayList<Integer> ans = obj.JobSequencing(jobIDs, deadlines, profits);
-            System.out.println(ans.get(0) + " " + ans.get(1));
+            ArrayList<Integer> result = obj.jobSequencing(deadline, profit);
+            System.out.println(result.get(0) + " " + result.get(1));
             System.out.println("~");
         }
+
+        sc.close();
     }
 }
 // } Driver Code Ends
-
-
-
-
-class Solution {
-    public ArrayList<Integer> JobSequencing(int[] id, int[] deadline, int[] profit) {
-     int[][] job = new int[id.length][3];
-     for(int i = 0; i<id.length; i++){
-         job[i][0] = id[i];
-         job[i][1] = deadline[i];
-         job[i][2] = profit[i];
-     }
-      Arrays.sort(job, (a, b) -> b[2] - a[2]);
-      int max = 0;
-      for(int i = 0; i<id.length; i++){
-          max = Math.max(max, job[i][1]);
-      }
-      int[] allocate = new int[max+1];
-      int tprofit = 0;
-      int count = 0;
-      Arrays.fill(allocate, -1);
-      for(int i = 0; i<id.length; i++){
-          for(int j = job[i][1]-1; j>=0; j--){
-              if(allocate[j] == -1){
-                  allocate[j] = 1;
-                  tprofit+= job[i][2];
-                  count++;
-                  break;
-              }
-          }
-      }
-      return new ArrayList<>(Arrays.asList(count, tprofit));
-    }
-}
